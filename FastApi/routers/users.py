@@ -1,10 +1,10 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 # HTTPException para darles avisos en las request http como los status
 from pydantic import BaseModel
 
 
 # Inicio del servidor uvicorn users:app --reload
-app = FastAPI()
+router = APIRouter()
 
 # Entidad User
 class User(BaseModel):
@@ -19,7 +19,7 @@ users_list = [User(id=1, name="Nicolas", surname="Viruel", url="hhttps://mourde.
               User(id=2, name="Alejandro", surname="Viruel", url="hhttps://mourde.dev", age=38),
               User(id=3, name="Catalina", surname="Viruel", url="hhttps://mourde.dev", age=2)]   
 
-@app.get("/usersjson")
+@router.get("/usersjson")
 async def userjson():
     return [{ "id": 1, "name": "Alexia", "surname": "Catalan", "url": "https://google.com", "age": 33},
             { "id": 2, "name": "Irene", "surname": "Vallejo", "url": "https://google.com", "age": 67},
@@ -28,30 +28,31 @@ async def userjson():
 
 
 
-@app.get("/users")
+@router.get("/users")
 async def users():
     return users_list
 
 # Get Users por Id // ---- Traer datos por el Path -----
-@app.get("/user/{id}")
+@router.get("/user/{id}")
 async def user(id: int):
     return search_user(id)
 
 
 # Get Users por Id // ---- Traer datos por Query -----
-@app.get("/user/")
+@router.get("/user/")
 async def user(id: int):
     search_user(user.id)
     return search_user(id)
 
 
 # Post Añadir usuario
+#response_model es lo que responde en caso que valla bien
 
-@app.post("/user", status_code=201)
+@router.post("/user", response_model=User, status_code=201)
 async def user(user: User):
     #Buscamos si es del tipo User y sino lo añadimos
     if type(search_user(user.id)) == User:
-        return HTTPException(status_code=201, detail= "El usuario ya existe")
+        raise HTTPException(status_code=404, detail= "El usuario ya existe")
        
     else:
         users_list.append(user)
@@ -60,7 +61,7 @@ async def user(user: User):
 
 # Put Modificar usuario
 
-@app.put("/user")
+@router.put("/user")
 async def user(user: User):
     found = False
 
@@ -81,7 +82,7 @@ async def user(user: User):
 
 # Delete usuario
 
-@app.delete("/user/{id}")
+@router.delete("/user/{id}")
 async def user(id: int):
 
     found = False

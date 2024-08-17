@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
-# HTTPException para darles avisos en las request http como los status
+from fastapi import APIRouter, HTTPException # HTTPException para darles avisos en las request http como los status
+
+# Pydantic es la BaseModel del modelo
 from pydantic import BaseModel
 
 
 # Inicio del servidor uvicorn users:app --reload
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"], responses={404: {"message": "No encontrado"}} ) 
 
 # Entidad User
 class User(BaseModel):
@@ -28,18 +29,18 @@ async def userjson():
 
 
 
-@router.get("/users")
+@router.get("/")
 async def users():
     return users_list
 
 # Get Users por Id // ---- Traer datos por el Path -----
-@router.get("/user/{id}")
+@router.get("/{id}")
 async def user(id: int):
     return search_user(id)
 
 
 # Get Users por Id // ---- Traer datos por Query -----
-@router.get("/user/")
+@router.get("/")
 async def user(id: int):
     search_user(user.id)
     return search_user(id)
@@ -48,7 +49,7 @@ async def user(id: int):
 # Post Añadir usuario
 #response_model es lo que responde en caso que valla bien
 
-@router.post("/user", response_model=User, status_code=201)
+@router.post("/", response_model=User, status_code=201)
 async def user(user: User):
     #Buscamos si es del tipo User y sino lo añadimos
     if type(search_user(user.id)) == User:
@@ -61,7 +62,7 @@ async def user(user: User):
 
 # Put Modificar usuario
 
-@router.put("/user")
+@router.put("/")
 async def user(user: User):
     found = False
 
@@ -82,7 +83,7 @@ async def user(user: User):
 
 # Delete usuario
 
-@router.delete("/user/{id}")
+@router.delete("/{id}")
 async def user(id: int):
 
     found = False

@@ -1,24 +1,17 @@
-from fastapi import APIRouter, HTTPException # HTTPException para darles avisos en las request http como los status
+from fastapi import APIRouter, HTTPException, status # HTTPException para darles avisos en las request http como los status
 
-# Pydantic es la BaseModel del modelo
-from pydantic import BaseModel
+# Importo la entidad de usuario
+from DB.models.user import User
 
 
 # Inicio del servidor uvicorn users:app --reload
-router = APIRouter(prefix="/usersdb", tags=["usersdb"], responses={404: {"message": "No encontrado"}} ) 
+router = APIRouter(prefix="/usersdb", tags=["usersdb"], responses={status.HTTP_404_NOT_FOUND: {"message": "No encontrado"}} ) 
 
-# Entidad User
-class User(BaseModel):
-    id: int
-    name: str
-    surname: str
-    url: str
-    age: int
+# importamos el cliente de base de datos
+from DB.client import db_client
 
 # Datos Ficticios de mi base de datos
-users_list = [User(id=1, name="Nicolas", surname="Viruel", url="hhttps://mourde.dev", age=35),
-              User(id=2, name="Alejandro", surname="Viruel", url="hhttps://mourde.dev", age=38),
-              User(id=3, name="Catalina", surname="Viruel", url="hhttps://mourde.dev", age=2)]   
+users_list = []   
 
 
 
@@ -42,13 +35,15 @@ async def user(id: int):
 # Post Añadir usuario
 #response_model es lo que responde en caso que valla bien
 
-@router.post("/", response_model=User, status_code=201)
+@router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
 async def user(user: User):
+
+
     #Buscamos si es del tipo User y sino lo añadimos
-    if type(search_user(user.id)) == User:
-        raise HTTPException(status_code=404, detail= "El usuario ya existe")
+    # if type(search_user(user.id)) == User:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "El usuario ya existe")
        
-    else:
+    # else:
         users_list.append(user)
         return user
 
